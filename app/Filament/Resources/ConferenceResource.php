@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Region;
 use App\Filament\Resources\ConferenceResource\Pages;
 use App\Filament\Resources\ConferenceResource\RelationManagers;
 use App\Models\Conference;
+use App\Models\Speaker;
+use App\Models\Venue;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -29,7 +32,7 @@ class ConferenceResource extends Resource
                     ->default('My conference')
                     ->required()
                     ->maxLength(60),
-                Forms\Components\RichEditor::make('description')
+                Forms\Components\MarkdownEditor::make('description')
                     ->required(),
                 Forms\Components\DatePicker::make('start_date')
                     ->native(false)
@@ -46,11 +49,25 @@ class ConferenceResource extends Resource
                         'archived' => 'Archived'
                     ])
                     ->required(),
-                Forms\Components\TextInput::make('region')
+                Forms\Components\Select::make('region')
+                    ->live()
                     ->required()
-                    ->maxLength(255),
+                    ->enum(Region::class)
+                    ->options(Region::class),
                 Forms\Components\Select::make('venue_id')
-                    ->relationship('venue', 'name'),
+                    ->searchable()
+                    ->preload()
+                    ->createOptionForm(Venue::getForm())
+                    ->editOptionForm(Venue::getForm())
+                    ->relationship('venue', 'name', modifyQueryUsing: function (Builder $query, Forms\Get $get) {
+                        return $query->where('region', operator: $get('region'));
+                    }),
+                Forms\Components\CheckboxList::make('speakers')
+                    ->relationship('speakers', 'name')
+                    ->options(
+                        Speaker::all()->pluck('name', 'id')
+                    )
+                    ->required(),
             ]);
     }
 
@@ -59,6 +76,7 @@ class ConferenceResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Conference Name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
