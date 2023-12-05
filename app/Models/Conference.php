@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\Region;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
@@ -87,14 +89,14 @@ class Conference extends Model
                                 ]),
                             Fieldset::make('Speakers')
                                 ->schema([
-                                    Select::make('speakers')
+                                    CheckboxList::make('speakers')
                                         ->columnSpanFull()
                                         ->relationship('speakers', 'name')
                                         ->options(
                                             Speaker::all()->pluck('name', 'id')
                                         )
                                         ->required(),
-                                ])
+                                ]),
 
                         ]),
                     Tab::make("Location")
@@ -113,11 +115,22 @@ class Conference extends Model
                                     return $query->where('region', $get('region'));
                                 }),
                         ]),
+
                 ]),
+                Actions::make( [
+                    Action::make('star')
+                        ->label('Fill with factory data')
+                        ->icon('heroicon-m-star')
+                        ->action(function ($livewire) {
+                            $data = Conference::factory()->make()->toArray();
+                            unset($data['venue_id']);
+                            $livewire->form->fill($data);
+                        })
+                ])
             //Section::make('Conference Details')
                 //->collapsible()
                 //->description('Provide basic information about a conference.')
-                //->icon('heroicon-o-information-circle')
+                //->icon('heroicon-o-information-circle' )
                 //->columns(2)
                 //,//]),
             //Section::make('Location')
