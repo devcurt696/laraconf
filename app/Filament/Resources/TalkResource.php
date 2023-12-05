@@ -26,9 +26,8 @@ class TalkResource extends Resource
                 Forms\Components\TextInput::make('title')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Textarea::make('abstract')
+                Forms\Components\MarkdownEditor::make('abstract')
                     ->required()
-                    ->maxLength(65535)
                     ->columnSpanFull(),
                 Forms\Components\Select::make('speaker_id')
                     ->relationship('speaker', 'name')

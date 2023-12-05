@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Region;
 use App\Filament\Resources\ConferenceResource\Pages;
 use App\Filament\Resources\ConferenceResource\RelationManagers;
 use App\Models\Conference;
+use App\Models\Speaker;
+use App\Models\Venue;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,36 +25,7 @@ class ConferenceResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Conference Name')
-                    ->helperText('The name of the conference.')
-                    ->default('My conference')
-                    ->required()
-                    ->maxLength(60),
-                Forms\Components\RichEditor::make('description')
-                    ->required(),
-                Forms\Components\DatePicker::make('start_date')
-                    ->native(false)
-                    ->required(),
-                Forms\Components\DateTimePicker::make('end_date')
-                    ->native(false)
-                    ->required(),
-                Forms\Components\Checkbox::make('is_published')
-                    ->default( true),
-                Forms\Components\Select::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'published' => 'Published',
-                        'archived' => 'Archived'
-                    ])
-                    ->required(),
-                Forms\Components\TextInput::make('region')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Select::make('venue_id')
-                    ->relationship('venue', 'name'),
-            ]);
+            ->schema(Conference::getForm());
     }
 
     public static function table(Table $table): Table
@@ -59,6 +33,7 @@ class ConferenceResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Conference Name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
